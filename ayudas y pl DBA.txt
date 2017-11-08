@@ -1,0 +1,179 @@
+notas y Pl's Admon BAse de datos:
+
+****vistas***
+
+CREATE VIEW clerk AS
+SELECT employee_id, last_name, departament_id, jod_id
+FROM employees
+WHERE jod_id = 'PU_CLERK';
+	or job_id = 'SH_CLERK'
+	OR JOD_ID = 'ST_CLERK';
+
+UPDATE clerk SET job_ID = 'PU_MAN' WHERE EMPLOYEE_ID = 118;
+
+CREATE VIEW clerk as
+   SELECT employee_id, last_name, departament_id, job_id
+   FROM employees
+   WHERE jod_id = 'PU_CLERK';
+	or job_id = 'SH_CLERK'
+	OR JOD_ID = 'ST_CLERK';
+   WITH CHECK OPTION;
+
+
+***Vistas(Prerequisitos)***
+
+CREATE VIEW emp_view AS
+	SELECT last_name, salary*12 annual_salary
+	FROM employees
+	WHERE departament_id = 20;
+
+CREATE OR REPLACE VIEW accounts:average_balance_gt_50000 AS
+select Accounts.type, Locations.city, AVG(balance) from Accounts
+inner join locations on Accounts.location_id = locationes.ID
+having avg(balance) >= 50000
+group by Accounts.type, Locations.city order by citiy;
+
+
+***STORED PROCEDURED (PL/SQL)***
+
+
+CREATE PROCEDURE remove_emp (employee_id NUMBER) AS
+	tot_emps NUMBER;
+	BEGIN
+		DELETE FROM employees
+		WHERE employees.employee.id = remove_emp.employee_id;
+		tots_emps := tot_emps -1;
+	END;
+
+DECLARE
+   -- Global variables
+   var1 number := 1;
+   start_time number := 0;
+BEGIN
+   start_time := DBMS_UTILITY.get_time;
+dbms_output.put_line('Clobal var1: ' || var1);
+   DECLARE
+      --local variables
+      car1 number := 15;
+   BEGIN
+      dbms_output.put_line('Time elapsed: ' || var1);
+   END;
+   dbms_output.put_line('Time elapsed: ' || (DMBS Utility.get_time - start_time) || ' miliseconds');
+END;
+
+
+***FUNCIONES***
+
+CREATE OR REPLACE FUNCTION findMin(x IN number, y IN number)
+RETURN number IS
+  z number := 0;
+BEGIN
+  IF X > Y then
+    z := Y;
+  ELSE
+    z := X;
+  END IF;
+  RETURN z;
+END;
+
+DECLARE
+BEGIN
+  dbms_output.put_line('Min between 15 - 20: ' || findMin(20, 15));
+END;
+
+
+**********************EJERCICIOS pl******************
+
+--PUNTO1. 
+
+DECLARE
+MULTI NUMBER := 6; 
+BEGIN
+FOR i IN 1..MULTI LOOP
+DBMS_OUTPUT.PUT_LINE('EL CUADRADO DE :' || TO_CHAR(i) || ' ES ' || TO_CHAR(i*i));
+END LOOP;
+END;
+
+--PUNTO2
+
+DECLARE
+MULTI NUMBER := 8; 
+BEGIN
+FOR i IN 1..10 LOOP
+DBMS_OUTPUT.PUT_LINE(TO_CHAR(i)|| ' X ' || TO_CHAR(MULTI) || ' = ' || TO_CHAR(i*MULTI));
+END LOOP;
+END;
+
+--PUNTO 3
+
+CREATE OR REPLACE FUNCTION PRIMO(N NUMBER)
+RETURN VARCHAR2
+IS
+VAR VARCHAR2(20);
+BEGIN
+FOR I IN 2..N-1 LOOP
+IF MOD(N,I)=0 THEN
+VAR:='NO ES PRIMO';
+ELSE
+VAR:= 'ES PRIMO';
+END IF;
+END LOOP;
+RETURN (VAR);
+END;
+
+******S3B4S, Q4******
+
+
+  CREATE OR REPLACE FORCE VIEW "CANTIDAD_HUECOS_BLOQUEADOS" ("CANTIDAD_HUECOS", "ENCARGADO_ID", "NOMBRES", "APELLIDOS", "CODIGO_INTERNO") AS 
+  SELECT COUNT( HUECOS.ID)"CANTIDAD_HUECOS",HUECOS.ENCARGADO_ID,ENCARGADOS.NOMBRES,ENCARGADOS.APELLIDOS,ENCARGADOS.CODIGO_INTERNO FROM HUECOS
+INNER JOIN ENCARGADOS ON HUECOS.ENCARGADO_ID = ENCARGADOS.ID 
+WHERE HUECOS.ESTADO = 'BLOQUEADO'
+group by HUECOS.ENCARGADO_ID, ENCARGADOS.NOMBRES, ENCARGADOS.APELLIDOS, ENCARGADOS.CODIGO_INTERNO
+ORDER BY "CANTIDAD_HUECOS" DESC
+;
+
+
+CREATE OR REPLACE FUNCTION OCURRENCIA_IMPAR (VAR1 IN VARCHAR2)
+RETURN CHAR IS
+TAMANO INTEGER; 
+var2 char;
+var3 char;
+var4 char ;
+contador INTEGER :=0;
+j INTEGER;
+BEGIN
+  TAMANO:=length(VAR1);
+  FOR i IN 1..TAMANO LOOP
+  var2:=SUBSTR(VAR1, i,1);
+    FOR j IN 1..TAMANO LOOP
+        var3:=SUBSTR(VAR1, j,1);
+        IF var2=var3 THEN
+        contador := contador +1;
+        END IF;
+    END LOOP;
+
+  DBMS_OUTPUT.PUT_LINE('EL NUMERO '||var2 || ' se encuentra ' ||contador||' veces');
+  IF contador = 1 THEN
+  var4:=var2;
+  contador:=0;
+  ELSE contador:=0;
+  END IF;
+  END LOOP;
+  RETURN var4;
+END;
+
+**************************
+
+CREATE TABLESPACE examen_ts datafile
+'C:\OracleGreisonPemberty\product\12.2.0\dbhome_2\oradata\sample\gofar_travel.dbf' SIZE 50M
+AUTOEXTAUTOEXTEND ON NEXT 100M MAXSIZE 500M
+EXTENT MANAGEMENT LOCAL
+SEGMENT SPACE MANAGEMENT AUTO
+ONLINE;
+
+REATE USER cesar
+IDENTIFIED BY chenamol
+DEFAULT TABLESPACE examen_ts
+QUOTA  UNLIMITED ON examen_ts;
+
+GRANT DBA TO cesar;
