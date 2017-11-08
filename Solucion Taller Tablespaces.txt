@@ -1,0 +1,170 @@
+﻿PAGINAS DE APOYO DEL TALLER
+
+https://docs.oracle.com/cd/E11882_01/server.112/e40540/intro.htm#CNCPT001
+http://www.oracle.com/technetwork/es/articles/idm/common-local-12c-2190666-esa.html
+http://oracleparatodos1.blogspot.com.co/2014/06/oracle-12c-usuarios-roles-y-privilegios.html    - muy buen articulo
+http://www.oracle.com/technetwork/es/articles/idm/common-local-12c-2190666-esa.html    - Leer necesariamente
+
+https://blogdeaitor.wordpress.com/2008/10/30/comandos-oracle-%E2%80%93-tercera-parte-%E2%80%93/ - El profesor saco la clase, creacion de los GRANT
+
+https://abenzoar.wordpress.com/2009/02/10/crear-usuario-oracle-con-sqlplus/ - Los usuarios creacion
+
+https://ora.u440.com/usuarios/create%20profile.html   - creacion de los perfiles 
+
+https://orlandoolguin.wordpress.com/2009/09/20/manejo-de-perfiles/  - pagina con ifno
+
+
+CONTRASEÑA: 
+Cacoo: elporte1985
+
+USUARIO BD DEVELOPER:
+usuario:system
+oracle: Elporte711951773
+
+COMANDOS PARA LISTENER: 
+lsnrctl status
+lsnrctl start
+
+--- SOLUCIÓN TALLER 
+
+--2. Crear 3 espacios de tabla (0.2):
+--a. primero con 1 Gb y 3 archivos de datos, el espacio de tablas debe ser llamado "gofar_travel"
+
+CREATE TABLESPACE GOFAR_TRAVEL DATAFILE
+'C:\OracleGreisonPemberty\product\12.2.0\dbhome_2\oradata\sample\gofar_travel.dbf' SIZE 500M, 
+'C:\OracleGreisonPemberty\product\12.2.0\dbhome_2\oradata\sample\gofar_trave2.dbf' SIZE 300M,
+'C:\OracleGreisonPemberty\product\12.2.0\dbhome_2\oradata\sample\gofar_trave3.dbf' SIZE 200M
+AUTOEXTEND ON NEXT 500M MAXSIZE 1G
+EXTENT MANAGEMENT LOCAL
+SEGMENT SPACE MANAGEMENT AUTO
+ONLINE;
+
+--b. el segundo con 500 Mb y 1 archivo de datos, llamado "test_purposes". 
+
+CREATE TABLESPACE TEST_PURPOSES DATAFILE
+'C:\OracleGreisonPemberty\product\12.2.0\dbhome_2\oradata\sample\test_purposes.dbf' SIZE 500M 
+AUTOEXTEND ON NEXT 100M MAXSIZE 500M
+EXTENT MANAGEMENT LOCAL
+SEGMENT SPACE MANAGEMENT AUTO
+ONLINE;
+
+--c. Undo TABLESPACE con 5Mb de espacio y 1 archivo de datos
+CREATE UNDO TABLESPACE UNDOTBS DATAFILE
+'C:\OracleGreisonPemberty\product\12.2.0\dbhome_2\oradata\sample\undotbs.dbf' SIZE 5M ;
+
+
+--3. Establezca el  undo tablespace que se va a utilizar en el system
+ALTER TABLESPACE UNDOTBS DATAFILE ONLINE;
+
+
+--4. Crear un usuario de DBA y asignarlo al espacio de tablas llamado "gofar_travel", este usuario tiene espacio ilimitado
+en el espacio de tablas 
+
+ALTER SESSION SET "_ORACLE_SCRIPT"=true;
+Drop user greison cascade;
+Select * from all_users;
+
+CREATE USER greison
+IDENTIFIED BY elporte1985 
+DEFAULT TABLESPACE gofar_travel
+QUOTA  UNLIMITED ON gofar_travel;
+
+select * from CDB_USERS;
+
+
+--5. Asigne el rol de DBA y los permisos para conectarse al usuario que acaba de crear.
+
+select * from DBA_ROLES;
+
+--5.1. Asigne el rol de DBA
+GRANT DBA TO GREISON; 
+
+--5.2. Permisos para conectarse 
+GRANT CONNECT TO GREISON;
+
+--6. Cree 3 perfiles:
+
+select *  from   dba_profiles;
+--a. Perfil 1: "Manager": Tiempo de una sesión por usuario, 40 días de duración de la contraseña, 15 mins inactivo, 4 intentos fallidos para inicio de sesión.
+
+CREATE PROFILE MANAGER LIMIT
+SESSIONS_PER_USER 1
+CONNECT_TIME 15
+PASSWORD_LIFE_TIME 40  
+FAILED_LOGIN_ATTEMPTS 4;
+
+
+--b. Perfil 2: "finance": Tiempo de una sesión por usuario, 15 días de duración de la contraseña, 3 mins inactivo, 2 intentos fallidos para inicio de sesión.
+
+CREATE PROFILE FINANCE LIMIT
+SESSIONS_PER_USER 1
+CONNECT_TIME 3
+PASSWORD_LIFE_TIME 15
+FAILED_LOGIN_ATTEMPTS 2;
+
+
+--c. Perfil 2: "development": Tiempo de dos sesión por usuario, 100 días de duración de la contraseña, 30 mins inactivo, 0 intentos fallidos para inicio de sesión.
+
+CREATE PROFILE DEVELOPMENT LIMIT
+SESSIONS_PER_USER 2
+CONNECT_TIME 30
+PASSWORD_LIFE_TIME 100;
+
+
+--7. Crear 4 usuarios, asignarles el espacio de tablas "gofar_travel"; perfiles creados deben ser utilizados para usuarios, todos los usuarios deben permitir conectarse a la base de datos.
+
+CREATE USER BIBIANA
+IDENTIFIED BY bibi2017
+DEFAULT TABLESPACE gofar_travel
+QUOTA UNLIMITED ON gofar_travel
+PROFILE MANAGER;
+GRANT CONNECT TO BIBIANA;
+
+
+CREATE USER CESAR
+IDENTIFIED BY cesar2017
+DEFAULT TABLESPACE gofar_travel
+QUOTA UNLIMITED ON gofar_travel
+PROFILE DEVELOPMENT;
+GRANT CONNECT TO CESAR;
+
+CREATE USER CONSULTA
+IDENTIFIED BY consulta2017
+DEFAULT TABLESPACE gofar_travel
+QUOTA UNLIMITED ON gofar_travel
+PROFILE FINANCE;
+GRANT CONNECT TO CONSULTA;
+
+CREATE USER ANDRES
+IDENTIFIED BY andres2017
+DEFAULT TABLESPACE gofar_travel
+QUOTA UNLIMITED ON gofar_travel
+PROFILE DEVELOPMENT;
+GRANT CONNECT TO ANDRES;
+
+--8. Bloquear los usuarios asociados con los perfiles: manager y finance.
+
+ALTER USER BIBIANA ACCOUNT LOCK;
+ALTER USER CONSULTA ACCOUNT LOCK;
+
+--8.1. Desbloquear 
+ALTER USER BIBIANA ACCOUNT UNLOCK;
+ALTER USER CONSULTA ACCOUNT UNLOCK;
+
+--9. Elimine el espacio de tablas denominado "test_purposes" 
+
+DROP TABLESPACE TEST_PURPOSES INCLUDING CONTENTS;
+
+--10. Crear tablas con sus columnas de acuerdo con su normalización. 
+--Cree secuencias para cada clave primaria. 
+--Cree claves primarias y foraneas.
+--Inserte al menos 50 vehículos, 20 clientes, 20 facturas (vaya a http://www.generatedata.com/). Esto debería ser una secuencia de comandos única funcional (.sql) (Mejor si generas sql a través de desarrollador de sql).
+
+
+
+
+
+
+
+
+
