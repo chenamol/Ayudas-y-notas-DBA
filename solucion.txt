@@ -1,0 +1,98 @@
+----FUNCTION TO calculate hypotenuse given two cathetus
+
+create or replace function hypotenuse(cateto1 in number, cateto2 in number)
+return number is 
+hipotenusa number;
+begin
+hipotenusa:=sqrt(power(cateto1,2)+(power(cateto2,2)));
+return hipotenusa;
+end;
+
+
+--5. FUNCTION TO CONVERT celsius TO Fahrenheit
+ create or replace function CONVERcelsiusTOFahrenheit(GradosC in number)
+ return number is 
+ GradosF number;
+ begin
+    GradosF:=(GradosC*1.8)+32;
+    return GradosF;
+    --.put_line('los gracos celsius' || GradosC || ' a grados Fahrenheit es : ' || GradosF);
+ end;
+ 
+DECLARE
+V_VARIABLE  NUMBER;
+BEGIN
+  V_VARIABLE := CONVERcelsiusTOFahrenheit(300);
+  DBMS_OUTPUT.PUT_LINE('la conversion de celsius a Fahrenheit es de: ' || V_VARIABLE);
+END;
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+examen
+
+create or replace view CANTIDAD_HUECOS_BLOQUEADOS
+as
+select count(estado) CANTIDAD_HUECOS , ENCARGADO_ID, NOMBRES, APELLIDOS, CODIGO_INTERNO 
+from encargados en inner join huecos hu on en.id=hu.encargado_id 
+where hu.estado='BLOQUEADO'
+group by ENCARGADO_ID, NOMBRES, APELLIDOS, CODIGO_INTERNO 
+order by CANTIDAD_HUECOS desc;
+
+
+declare
+texto varchar2(255):='939739';
+begin
+    DBMS_OUTPUT.PUT_LINE( ': ' || OCURRENCIA_IMPAR(texto) );
+end;
+
+create or replace function OCURRENCIA_IMPAR(texto varchar2) return char is 
+        letra VARCHAR(1);
+        letra2 VARCHAR(1);
+        contador int;   
+begin 
+for i in 1..LENGTH(texto) loop 
+    contador :=0;
+    letra := SUBSTR(texto, i, 1);
+    for j in 1..LENGTH(texto) loop
+        letra2 := SUBSTR(texto, j, 1);                 
+            if (letra2 = letra) then
+                contador := contador +1;
+            end if;
+    end loop;
+        if (contador=1) then
+            return letra;
+        end if;
+        
+end loop;   
+end;
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+create trigger Trigger1 before update on categories
+for each row
+begin
+    DBMS_OUTPUT.PUT_LINE('valoranterior ' || :old.season || 'valor nuevo: ' ||:new.season);
+end;
+
+ --   DBMS_OUTPUT.PUT_LINE(substr(nombre,n,1));
+-- DBMS_OUTPUT.PUT_LINE('la a se encontro en:'|| instr(nombre,'r',1));
+declare
+nombre varchar (100):='andres martinez gutierrez';
+n integer :=1;
+begin
+    while n<=length(nombre) loop
+    if (SUBSTR(nombre,n,1)='r') then
+    DBMS_OUTPUT.PUT_LINE('la r se encontro en:'||n);
+    end if;
+    n := n+1;
+end loop;
+end;
+
+
+
+
+
+
+
+
+
+
